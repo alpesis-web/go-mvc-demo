@@ -6,3 +6,6 @@
 *.swp
 *.swm
 *.swn
+
+# env
+env/

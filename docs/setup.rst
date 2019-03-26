@@ -28,3 +28,7 @@ Dev
     
     $ go build src/main.go
     $ ./main
+
+::
+
+    $ go get github.com/gorilla/mux

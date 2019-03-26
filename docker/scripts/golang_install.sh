@@ -1,10 +1,11 @@
-# Installing Golang
+# installing golang 1.11
 
 cd /tmp
-mkdir go
-cd go
-wget https://dl.google.com/go/go1.11.4.linux-amd64.tar.gz
-sudo tar -xvf go1.11.4.linux-amd64.tar.gz
-sudo mv go /mandelbrot/local/
+wget https://dl.google.com/go/go1.11.linux-amd64.tar.gz
+tar -xvf go1.11.linux-amd64.tar.gz
+mv go /mandelbrot/local
 
 export GOROOT=/mandelbrot/local/go
+export GOPATH=/mandelbrot/local/go
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+

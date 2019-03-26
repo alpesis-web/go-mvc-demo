@@ -1,1 +1,1 @@
-docker build -t "mandelbrot-platform" .
+docker build -t "mandelbrot-platform:dev" -f Dockerfile.dev .
