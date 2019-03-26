@@ -9,7 +9,7 @@ Getting Started
 ::
 
     # create docker containers (first time only)
-    $ ./scripts/devstack_init.sh
+    $ ./scripts/devstack_launch.sh
 
     # start containers
     $ ./scripts/devstack_start.sh start|stop
