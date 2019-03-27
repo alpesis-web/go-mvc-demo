@@ -14,6 +14,7 @@ func NewRouter() *mux.Router {
     r.HandleFunc("/", indexHandler).Methods("GET")
     r.HandleFunc("/login", loginGetHandler).Methods("GET")
     r.HandleFunc("/login", loginPostHandler).Methods("POST")
+    r.HandleFunc("/logout", logoutGetHandler).Methods("GET")
     r.HandleFunc("/register", registerGetHandler).Methods("GET")
     r.HandleFunc("/register", registerPostHandler).Methods("POST")
     r.HandleFunc("/dashboard", middleware.AuthRequired(dashboardGetHandler)).Methods("GET")
@@ -65,6 +66,14 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
     http.Redirect(w, r, "/dashboard", 302)
 }
 
+func logoutGetHandler(w http.ResponseWriter, r *http.Request) {
+    session, _ := sessions.Store.Get(r, "session")
+    delete(session.Values, "user_id")
+    session.Save(r, w)
+    http.Redirect(w, r, "/login", 302)
+
+}
+
 func registerGetHandler(w http.ResponseWriter, r *http.Request) {
     utils.ExecuteTemplate(w, "register.html", nil)
 }
@@ -96,9 +105,11 @@ func dashboardGetHandler(w http.ResponseWriter, r *http.Request) {
     utils.ExecuteTemplate(w, "dashboard.html", struct {
         Title string
         Updates []*models.Update
+        DisplayForm bool
     }{
         Title: "All Updates",
         Updates: updates,
+        DisplayForm: true,
     })
 }
 
@@ -123,6 +134,14 @@ func dashboardPostHandler(w http.ResponseWriter, r *http.Request) {
 
 
 func userGetHandler(w http.ResponseWriter, r *http.Request) {
+    session, _ := sessions.Store.Get(r, "session")
+    untypedUserId := session.Values["user_id"]
+    currentUserId, ok := untypedUserId.(int64)
+    if !ok {
+        utils.InternalServerError(w)
+        return
+    }
+
     vars := mux.Vars(r)
     username := vars["username"]
     user, err := models.GetUserByUsername(username)
@@ -145,8 +164,10 @@ func userGetHandler(w http.ResponseWriter, r *http.Request) {
     utils.ExecuteTemplate(w, "dashboard.html", struct {
         Title string
         Updates []*models.Update
+        DisplayForm bool
     }{
         Title: username,
         Updates: updates,
+        DisplayForm: currentUserId == userId,
     })
 }
