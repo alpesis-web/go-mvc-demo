@@ -48,16 +48,14 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
             case models.ErrInvalidLogin:
                 utils.ExecuteTemplate(w, "login.html", "invalid login")
             default:
-                w.WriteHeader(http.StatusInternalServerError)
-                w.Write([]byte("Internal server error"))
+                utils.InternalServerError(w)
         }
         return
     }
 
     userId, err := user.GetId()
     if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("Internal server error"))
+        utils.InternalServerError(w)
         return
     }
     session, _ := sessions.Store.Get(r, "session")
@@ -78,8 +76,7 @@ func registerPostHandler(w http.ResponseWriter, r *http.Request) {
 
     err := models.RegisterUser(username, password)
     if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("Internal server error"))
+        utils.InternalServerError(w)
         return
     }
 
@@ -90,8 +87,7 @@ func registerPostHandler(w http.ResponseWriter, r *http.Request) {
 func dashboardGetHandler(w http.ResponseWriter, r *http.Request) {
     updates, err := models.GetAllUpdates()
     if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("Internal server error"))
+        utils.InternalServerError(w)
         return
     }
     utils.ExecuteTemplate(w, "dashboard.html", struct {
@@ -108,8 +104,7 @@ func dashboardPostHandler(w http.ResponseWriter, r *http.Request) {
     untypedUserId := session.Values["user_id"]
     userId, ok := untypedUserId.(int64)
     if !ok {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("Internal server error"))
+        utils.InternalServerError(w)
         return
     }
 
@@ -117,8 +112,7 @@ func dashboardPostHandler(w http.ResponseWriter, r *http.Request) {
     update := r.PostForm.Get("update")
     err := models.PostUpdate(userId, update)
     if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("Internal server error"))
+        utils.InternalServerError(w)
         return
     }
     http.Redirect(w, r, "/dashboard", 302)
@@ -130,22 +124,19 @@ func userGetHandler(w http.ResponseWriter, r *http.Request) {
     username := vars["username"]
     user, err := models.GetUserByUsername(username)
     if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("Internal server error"))
+        utils.InternalServerError(w)
         return
     }
 
     userId, err := user.GetId()
     if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("Internal server error"))
+        utils.InternalServerError(w)
         return
     }
 
     updates, err := models.GetUpdates(userId)
     if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Write([]byte("Internal server error"))
+        utils.InternalServerError(w)
         return
     }
     utils.ExecuteTemplate(w, "dashboard.html", struct {
