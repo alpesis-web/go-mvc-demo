@@ -13,6 +13,17 @@ Features:
 Getting Started
 =============================================================================
 
+Docker Images
+
+::
+
+    $ cd docker
+    $ ./basebox_build.sh
+    $ ./devstack_build.sh
+
+
+Docker Containers
+
 ::
 
     # create docker containers (first time only)
@@ -27,13 +38,3 @@ Getting Started
     $ cd platform
     $ go run main.go
     # browse localhost:9090
-
-=============================================================================
-Docker
-=============================================================================
-
-::
-
-    $ cd docker
-    $ ./basebox_build.sh
-    $ ./devstack_build.sh
