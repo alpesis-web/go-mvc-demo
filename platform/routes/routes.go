@@ -94,7 +94,13 @@ func dashboardGetHandler(w http.ResponseWriter, r *http.Request) {
         w.Write([]byte("Internal server error"))
         return
     }
-    utils.ExecuteTemplate(w, "dashboard.html", updates)
+    utils.ExecuteTemplate(w, "dashboard.html", struct {
+        Title string
+        Updates []*models.Update
+    }{
+        Title: "All Updates",
+        Updates: updates,
+    })
 }
 
 func dashboardPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -142,5 +148,11 @@ func userGetHandler(w http.ResponseWriter, r *http.Request) {
         w.Write([]byte("Internal server error"))
         return
     }
-    utils.ExecuteTemplate(w, "dashboard.html", updates)
+    utils.ExecuteTemplate(w, "dashboard.html", struct {
+        Title string
+        Updates []*models.Update
+    }{
+        Title: username,
+        Updates: updates,
+    })
 }
