@@ -75,7 +75,10 @@ func registerPostHandler(w http.ResponseWriter, r *http.Request) {
     password := r.PostForm.Get("password")
 
     err := models.RegisterUser(username, password)
-    if err != nil {
+    if err == models.ErrUsernameTaken {
+        utils.ExecuteTemplate(w, "register.html", "username taken")
+        return
+    } else if err != nil {
         utils.InternalServerError(w)
         return
     }

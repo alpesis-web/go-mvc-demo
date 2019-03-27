@@ -10,6 +10,7 @@ import (
 var (
     ErrUserNotFound = errors.New("user not found")
     ErrInvalidLogin = errors.New("invalid login")
+    ErrUsernameTaken = errors.New("username taken")
 )
 
 
@@ -19,6 +20,11 @@ type User struct {
 
 
 func NewUser(username string, hash []byte) (*User, error) {
+    exists, err := client.HExists("user:by-username", username).Result()
+    if exists {
+        return nil, ErrUsernameTaken 
+    }
+
     id, err := client.Incr("user:next-id").Result()
     if err != nil {
         return nil, err
