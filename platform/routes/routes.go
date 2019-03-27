@@ -5,6 +5,7 @@ import (
     "github.com/gorilla/mux"
     "../models"
     "../sessions"
+    "../middleware"
     "../utils"
 )
 
@@ -15,8 +16,8 @@ func NewRouter() *mux.Router {
     r.HandleFunc("/login", loginPostHandler).Methods("POST")
     r.HandleFunc("/register", registerGetHandler).Methods("GET")
     r.HandleFunc("/register", registerPostHandler).Methods("POST")
-    r.HandleFunc("/dashboard", AuthRequired(dashboardGetHandler)).Methods("GET")
-    r.HandleFunc("/dashboard", AuthRequired(dashboardPostHandler)).Methods("POST")
+    r.HandleFunc("/dashboard", middleware.AuthRequired(dashboardGetHandler)).Methods("GET")
+    r.HandleFunc("/dashboard", middleware.AuthRequired(dashboardPostHandler)).Methods("POST")
 
     fs := http.FileServer(http.Dir("./static/"))
     r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
@@ -24,17 +25,6 @@ func NewRouter() *mux.Router {
     return r
 }
 
-func AuthRequired(handler http.HandlerFunc) http.HandlerFunc {
-    return func(w http.ResponseWriter, r *http.Request) {
-        session, _ := sessions.Store.Get(r, "session")
-        _, ok := session.Values["username"]
-        if !ok {
-            http.Redirect(w, r, "/login", 302)
-            return
-        }
-        handler.ServeHTTP(w, r)
-    }
-}
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
     utils.ExecuteTemplate(w, "index.html", nil)
