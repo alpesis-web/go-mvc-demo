@@ -5,14 +5,16 @@
   <body>
     <h1>Welcome to Dashboard!</h1>
     <form method="POST">
-      <textarea name="comment"></textarea>
+      <textarea name="update"></textarea>
       <div>
-        <button type="submit">Submit</button>
+        <button type="submit">Update</button>
       </div>
     </form>
     <h2>Comments</h2>
     {{ range . }}
-      <div>{{ . }}</div>
+      <div>
+        <div>{{ .GetUser.GetUsername}} wrote: {{ .GetUpdate }}</div>
+      </div>
     {{ end }}
   </body>
 </html>

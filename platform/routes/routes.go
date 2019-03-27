@@ -39,7 +39,7 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
     username := r.PostForm.Get("username")
     password := r.PostForm.Get("password")
 
-    err := models.AuthenticateUser(username, password)
+    user, err := models.AuthenticateUser(username, password)
     if err != nil {
         switch err {
             case models.ErrUserNotFound:
@@ -53,8 +53,14 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    userId, err := user.GetId()
+    if err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write([]byte("Internal server error"))
+        return
+    }
     session, _ := sessions.Store.Get(r, "session")
-    session.Values["username"] = username
+    session.Values["user_id"] = userId
     session.Save(r, w)
 
     http.Redirect(w, r, "/dashboard", 302)
@@ -80,19 +86,28 @@ func registerPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func dashboardGetHandler(w http.ResponseWriter, r *http.Request) {
-    comments, err := models.GetComments()
+    updates, err := models.GetUpdates()
     if err != nil {
         w.WriteHeader(http.StatusInternalServerError)
         w.Write([]byte("Internal server error"))
         return
     }
-    utils.ExecuteTemplate(w, "dashboard.html", comments)
+    utils.ExecuteTemplate(w, "dashboard.html", updates)
 }
 
 func dashboardPostHandler(w http.ResponseWriter, r *http.Request) {
+    session, _ := sessions.Store.Get(r, "session")
+    untypedUserId := session.Values["user_id"]
+    userId, ok := untypedUserId.(int64)
+    if !ok {
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write([]byte("Internal server error"))
+        return
+    }
+
     r.ParseForm()
-    comment := r.PostForm.Get("comment")
-    err := models.PostComment(comment)
+    update := r.PostForm.Get("update")
+    err := models.PostUpdate(userId, update)
     if err != nil {
         w.WriteHeader(http.StatusInternalServerError)
         w.Write([]byte("Internal server error"))
