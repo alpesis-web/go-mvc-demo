@@ -27,14 +27,26 @@ func main() {
     r.HandleFunc("/login", loginPostHandler).Methods("POST")
     r.HandleFunc("/register", registerGetHandler).Methods("GET")
     r.HandleFunc("/register", registerPostHandler).Methods("POST")
-    r.HandleFunc("/dashboard", dashboardGetHandler).Methods("GET")
-    r.HandleFunc("/dashboard", dashboardPostHandler).Methods("POST")
+    r.HandleFunc("/dashboard", AuthRequired(dashboardGetHandler)).Methods("GET")
+    r.HandleFunc("/dashboard", AuthRequired(dashboardPostHandler)).Methods("POST")
 
     fs := http.FileServer(http.Dir("./static/"))
     r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 
     http.Handle("/", r)
     http.ListenAndServe(":9090", nil)
+}
+
+func AuthRequired(handler http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        session, _ := store.Get(r, "session")
+        _, ok := session.Values["username"]
+        if !ok {
+            http.Redirect(w, r, "/login", 302)
+            return
+        }
+        handler.ServeHTTP(w, r)
+    }
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -100,13 +112,6 @@ func registerPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func dashboardGetHandler(w http.ResponseWriter, r *http.Request) {
-    session, _ := store.Get(r, "session")
-    _, ok := session.Values["username"]
-    if !ok {
-        http.Redirect(w, r, "/login", 302)
-        return
-    }
-
     comments, err := client.LRange("comments", 0, 10).Result()
     if err != nil {
         w.WriteHeader(http.StatusInternalServerError)
